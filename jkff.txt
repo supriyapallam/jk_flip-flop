@@ -1,0 +1,55 @@
+//Design Code
+module jk_ff(output reg q,output wire qbar,input clk,j,k);
+  always@(posedge clk)
+    begin
+      case({j,k})
+        2'b00 : q <= q;
+        2'b01 : q <= 1'b0;
+        2'b10 : q <= 1'b1;
+        2'b11 : q <= ~q;
+        default : q <= 1'bx;
+      endcase
+    end
+  assign qbar = ~q;
+endmodule
+
+//Test Bench Code
+module tb();
+  wire q,qbar;
+  reg clk,j,k;
+  jk_ff DUT(q,qbar,clk,j,k);
+  
+  initial
+    begin
+      clk=1'b0;
+      forever #4 clk=~clk;
+    end
+  
+  initial
+    begin
+      j=1'b0; k=1'b1; //reset
+      #10;
+      j=1'b1; k=1'b0; //set
+      #5;
+      j=1'b0; k=1'b0; //previous
+      #3;
+      j=1'b1; k=1'b1; //toggle
+      #5;
+      j=1'b0; k=1'b1; //reset
+      #3;
+      $finish;
+    end
+  
+  initial
+    begin
+      $dumpfile("test.vcd");
+      $dumpvars(1);
+    end
+  
+  initial
+    begin
+      $timeformat(-9,0,"ns",10);
+      $monitor("time=%0t,j=%b,k=%b,q=%b,qbar=%b",$time,j,k,q,qbar);
+    end
+endmodule
+
